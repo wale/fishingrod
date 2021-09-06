@@ -140,7 +140,7 @@ function _rod_get_host
             else if test -f /tmp/sysinfo/model
                 set _rod_host (cat /tmp/sysinfo/model)
             end
-        case Darwin*
+        case Darwin
             set _rod_host (sysctl -n hw.model)
     end
     # todo: strip unwanted strings (e.g. 'to be filled by OEM')
