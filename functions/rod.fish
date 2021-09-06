@@ -2,6 +2,7 @@
 set _rod_os ""
 set _rod_distro ""
 set _rod_host ""
+set _rod_uptime ""
 
 # Set the _rod_kernel output to uname -s.
 set _rod_kernel (uname -s)
@@ -22,10 +23,9 @@ function _rod_get_os
         case "Darwin"
             set _rod_os MacOS
         case "CYGWIN*" "MSYS*" "MINGW*"
-            set _rod_os 
-            Windows
+            set _rod_os Windows
         case "*"
-			printf "%s\n" "Unknown/unsupported OS detected: $__fitch_kernel_name, aborting..."
+			printf "%s\n" "Unknown/unsupported OS detected: $_rod_kernel_name, aborting..."
             echo "Create an issue on GitHub for your operating system."
 			exit 1
     end
@@ -118,7 +118,6 @@ function _rod_get_distro
             set _rod_distro (uname -sv)
         case "*"
             # Catch all to ensure '$distro' is never blank.
-            # This also handles the BSDs.
             set _rod_distro "$_rod_os $_rod_kernel"
         ;;
     end
@@ -138,19 +137,33 @@ function _rod_get_host
     # todo: strip unwanted strings (e.g. 'to be filled by OEM')
 end
 
+
+
+function _rod_get_uptime
+    switch $_rod_kernel
+        case Linux
+            set seconds +(math (cat /proc/uptime | cut -f1 -d " "))
+            set days (math floor $seconds/3600/24)
+            set _rod_uptime (date -ud "@$seconds" +"$daysd %Hh %Mm %Ss" | string trim)
+    end
+end
+
 function _rod_format_output
     set _rod_user_info "$USER@$hostname"
-    set_color -o red; echo $_rod_user_info
-    set_color normal; echo -e "\n"
-    echo "Host: "(set_color -o yellow)"$_rod_host"(set_color normal)
-    echo "OS: "(set_color -o blue)"$_rod_os"(set_color normal)
-    echo "Distro: "(set_color -o green)"$_rod_distro"(set_color normal)
-    echo "Kernel: "(set_color -o purple)"$_rod_kernel_ver"(set_color normal)
+    set_color -o magenta; echo $_rod_user_info
+    set_color normal
+    set_color -o blue; echo "host: "(set_color normal)$_rod_host
+    set_color -o blue; echo "os: "(set_color normal)$_rod_os
+    set_color -o blue; echo "distro: "(set_color normal)$_rod_distro
+    set_color -o blue; echo "kernel: "(set_color normal)$_rod_kernel_ver
+    set_color -o blue; echo "uptime: "(set_color normal)$_rod_uptime
 end
+
 
 function rod -d "System information tool"
     _rod_get_os
     _rod_get_distro
     _rod_get_host
+    _rod_get_uptime
     _rod_format_output
 end
