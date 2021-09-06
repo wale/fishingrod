@@ -125,8 +125,6 @@ end
 function _rod_get_host
     switch $_rod_kernel
         case Linux
-            # The files are playing tricks on us.
-            # The names of the files don't always reflect the content.
             if test -d /system/app && test -d /system/priv-app
                 set _rod_model_brand (getprop ro.product.brand)
                 set _rod_model_name (getprop ro.product.model)
@@ -139,6 +137,10 @@ function _rod_get_host
                 set _rod_host (cat /sys/firmware/devicetree/base/model)
             else if test -f /tmp/sysinfo/model
                 set _rod_host (cat /tmp/sysinfo/model)
+            else if test -n "$WSLENV"
+                set _rod_host "WSL2 VM based on Hyper-V"
+            else if contains (uname -r) -Microsoft
+                set _rod_host "WSL1 host"
             end
         case Darwin
             set _rod_host (sysctl -n hw.model)
