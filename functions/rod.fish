@@ -25,7 +25,7 @@ function _rod_get_os
         case "CYGWIN*" "MSYS*" "MINGW*"
             set _rod_os Windows
         case "*"
-			printf "%s\n" "Unknown/unsupported OS detected: $_rod_kernel_name, aborting..."
+			printf "%s\n" "Unknown/unsupported OS detected: $_rod_kernel, aborting..."
             echo "Create an issue on GitHub for your operating system."
     end
 end
