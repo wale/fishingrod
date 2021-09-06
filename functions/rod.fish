@@ -27,7 +27,6 @@ function _rod_get_os
         case "*"
 			printf "%s\n" "Unknown/unsupported OS detected: $_rod_kernel_name, aborting..."
             echo "Create an issue on GitHub for your operating system."
-			exit 1
     end
 end
 
@@ -75,7 +74,7 @@ function _rod_get_distro
             if test -n "$WSLENV"
                 set _rod_distro $_rod_distro "on Windows 10 (WSL2)"
             else if contains (uname -r) -Microsoft
-                set _rod_distro $_rod_distro " on Windows 10 (WSL1)"
+                set _rod_distro $_rod_distro "on Windows 10 (WSL1)"
             end
         case Android
             set -g _rod_distro "Android " (getprop ro.build.version.release)
@@ -128,9 +127,19 @@ function _rod_get_host
         case Linux
             # The files are playing tricks on us.
             # The names of the files don't always reflect the content.
-            read -l model_name < /sys/devices/virtual/dmi/id/product_name
-            read -l model_version < /sys/devices/virtual/dmi/id/product_version
-            set _rod_host "$model_name $model_version"
+            if test -d /system/app && test -d /system/priv-app
+                set _rod_model_brand (getprop ro.product.brand)
+                set _rod_model_name (getprop ro.product.model)
+                set _rod_host "$_rod_model_brand $_rod_model_name"
+            else if test -f /sys/devices/virtual/dmi/id/product_name && test -f /sys/devices/virtual/dmi/id/product_version
+                read -l model_name < /sys/devices/virtual/dmi/id/product_name
+                read -l model_version < /sys/devices/virtual/dmi/id/product_version
+                set _rod_host "$model_name $model_version"
+            else if test -f /sys/firmware/devicetree/base/model
+                set _rod_host (cat /sys/firmware/devicetree/base/model)
+            else if test -f /tmp/sysinfo/model
+                set _rod_host (cat /tmp/sysinfo/model)
+            end
         case Darwin*
             set _rod_host (sysctl -n hw.model)
     end
