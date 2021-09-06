@@ -10,7 +10,7 @@ set _rod_kernel_ver (uname -r)
 
 function _rod_get_os
     switch $_rod_kernel
-        case "Linux*" "GNU*"
+        case "Linux"
             if test -d /system/app && test -d /system/priv-app
                 set _rod_os Android
             else
